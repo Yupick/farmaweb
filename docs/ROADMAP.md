@@ -514,10 +514,10 @@ Construir una solución integral de software para la Farmacia Científica Malvin
 - [x] SETUP.md
 
 ### Código Base
-- [ ] Repositorio Git inicializado
-- [ ] Estructura de carpetas creada
-- [ ] .gitignore configurado
-- [ ] Variables de entorno documentadas
+- [x] Repositorio Git inicializado
+- [x] Estructura de carpetas creada
+- [x] .gitignore configurado
+- [x] Variables de entorno documentadas
 - [ ] Docker files listos
 
 ### Infraestructura
@@ -526,9 +526,15 @@ Construir una solución integral de software para la Farmacia Científica Malvin
 - [x] Seeds de datos iniciales
 
 ### Testing
-- [ ] Tests unitarios configurados
-- [ ] Tests de integración configurados
+- [x] Tests unitarios configurados
+- [x] Tests de integración configurados
 - [ ] GitHub Actions para CI/CD
+
+### Scripts y Automatización
+- [x] Script de inicio de servicios (start-services.sh)
+- [x] Script de paro de servicios (stop-services.sh)
+- [x] Script de visualización de logs (view-logs.sh)
+- [x] Gestión automática de PIDs y puertos
 
 ---
 
@@ -555,11 +561,40 @@ Construir una solución integral de software para la Farmacia Científica Malvin
 | Versión | Fecha | Cambios |
 |---------|-------|---------|
 | 1.0 | 10 Ene 2026 | Versión inicial del roadmap |
+| 2.0 | 10 Ene 2026 | Configuración general editable, páginas dinámicas por slug, chatbot admin con LLM configurable, landing dinámica, scripts de servicios |
 
 ---
 
-**Estado Actual:** ✅ FASE 1 - Iniciación  
+**Estado Actual:** ✅ FASES 1-4 COMPLETADAS (100%) + Configuración General Editable + Páginas Dinámicas + Chatbot Admin Configurable  
 **Última Actualización:** 10 de enero de 2026
-**Estado Actual:** ✅ FASES 1-4 COMPLETADAS (100%)  
-**Última Actualización:** 10 de enero de 2026
+
+### ✨ Funcionalidades Adicionales Implementadas
+
+**Configuración General Dinámica**
+- [x] Nombre del comercio editable
+- [x] Slogan personalizable
+- [x] Email, teléfono y WhatsApp configurables
+- [x] Dirección física editable
+- [x] Enlaces de cabecera y pie (JSON configurable)
+
+**Sistema de Páginas Dinámicas**
+- [x] Ruta de páginas internas por slug (/pages/[slug])
+- [x] Endpoint backend para páginas: GET /api/content/page/slug/:slug
+- [x] Páginas creadas: sobre, productos, contacto, políticas, términos
+- [x] Landing page consume configuración general
+- [x] Enlaces de navegación dinámicos en header/footer
+
+**Chatbot Administrativo Mejorado**
+- [x] Selección de proveedor de IA (Groq/OpenAI) con combobox
+- [x] Selección de modelo por proveedor
+- [x] API keys dedicadas por proveedor
+- [x] System prompts independientes (admin vs cliente WhatsApp)
+- [x] Asistencia IA en creador de contenido
+- [x] Panel de chat administrativo con estadísticas
+
+**Gestión de Contenido Avanzada**
+- [x] Tipo de contenido descriptivo en combobox
+- [x] Tipo 'Página' con campos slug y body (HTML)
+- [x] Asistencia de IA para generar contenido
+- [x] Integración con chatbot admin para prellenar contenido
 

@@ -83,6 +83,14 @@ export async function createDefaultConfigurations() {
     { key: 'llm_system_prompt', value: 'Eres un asistente administrativo de Farmacia Científica Malvinas. Responde brevemente en español y con precisión. Si no tienes datos, sugiere cómo obtenerlos desde el sistema.', type: 'string', description: 'System prompt del chatbot administrativo' },
     { key: 'whatsapp_system_prompt', value: 'Eres un asistente amable de farmacia para Farmacia Científica Malvinas. Responde brevemente en español (máximo 100 palabras). Si no puedes responder, sugiere contactar al equipo de farmacia.', type: 'string', description: 'System prompt del chatbot cliente (WhatsApp)' },
     { key: 'whatsapp_enabled', value: 'false', type: 'boolean', description: 'WhatsApp habilitado' },
+    { key: 'whatsapp_provider', value: 'meta', type: 'string', description: 'Proveedor de WhatsApp (meta/twilio)' },
+    { key: 'whatsapp_phone_number', value: process.env.WHATSAPP_PHONE_NUMBER || '', type: 'string', description: 'Número de WhatsApp de la farmacia' },
+    { key: 'meta_api_token', value: process.env.META_API_TOKEN || '', type: 'string', description: 'Token de API de Meta WhatsApp Cloud API' },
+    { key: 'meta_phone_id', value: process.env.META_PHONE_ID || '', type: 'string', description: 'Phone Number ID de Meta WhatsApp' },
+    { key: 'meta_verify_token', value: process.env.META_VERIFY_TOKEN || '', type: 'string', description: 'Verify Token para webhook de Meta' },
+    { key: 'twilio_account_sid', value: process.env.TWILIO_ACCOUNT_SID || '', type: 'string', description: 'Account SID de Twilio' },
+    { key: 'twilio_auth_token', value: process.env.TWILIO_AUTH_TOKEN || '', type: 'string', description: 'Auth Token de Twilio' },
+    { key: 'twilio_whatsapp_number', value: process.env.TWILIO_WHATSAPP_NUMBER || '', type: 'string', description: 'Número de WhatsApp de Twilio (formato: whatsapp:+1234567890)' },
     { key: 'instagram_enabled', value: 'false', type: 'boolean', description: 'Instagram habilitado' }
   ];
 

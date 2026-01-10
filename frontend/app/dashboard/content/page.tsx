@@ -12,6 +12,10 @@ interface Content {
   image_url: string
   position: number
   is_active: number
+  data?: { slug?: string; body?: string }
+  display_modal?: number
+  display_footer?: number
+  display_menu?: number
 }
 
 export default function ContentManagement() {
@@ -28,7 +32,10 @@ export default function ContentManagement() {
     image_url: '',
     position: 0,
     is_active: 1,
-    data: { slug: '', body: '' }
+    data: { slug: '', body: '' },
+    display_modal: 0,
+    display_footer: 0,
+    display_menu: 0
   })
 
   const contentTypes = [
@@ -91,7 +98,11 @@ export default function ContentManagement() {
       description: item.description,
       image_url: item.image_url,
       position: item.position,
-      is_active: item.is_active
+      is_active: item.is_active,
+      data: item.data || { slug: '', body: '' },
+      display_modal: item.display_modal || 0,
+      display_footer: item.display_footer || 0,
+      display_menu: item.display_menu || 0
     })
     setEditingId(item.id)
     setShowForm(true)
@@ -118,7 +129,10 @@ export default function ContentManagement() {
       image_url: '',
       position: 0,
       is_active: 1,
-      data: { slug: '', body: '' }
+      data: { slug: '', body: '' },
+      display_modal: 0,
+      display_footer: 0,
+      display_menu: 0
     })
     setEditingId(null)
     setShowForm(false)
@@ -254,6 +268,35 @@ export default function ContentManagement() {
                     rows={8}
                     placeholder="<h2>Título</h2><p>Contenido...</p>"
                   />
+                </div>
+                <div className="col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.display_modal}
+                      onChange={(e) => setFormData({ ...formData, display_modal: e.target.checked ? 1 : 0 })}
+                      className="rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Habilitar Modal</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.display_footer}
+                      onChange={(e) => setFormData({ ...formData, display_footer: e.target.checked ? 1 : 0 })}
+                      className="rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Display en Footer</span>
+                  </label>
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={!!formData.display_menu}
+                      onChange={(e) => setFormData({ ...formData, display_menu: e.target.checked ? 1 : 0 })}
+                      className="rounded"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Display en Menú</span>
+                  </label>
                 </div>
               </>
             )}

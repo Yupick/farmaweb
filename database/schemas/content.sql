@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS content (
     image_alt_text VARCHAR(255),
     position INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
+    data TEXT,
+    display_modal BOOLEAN DEFAULT FALSE,
+    display_footer BOOLEAN DEFAULT FALSE,
+    display_menu BOOLEAN DEFAULT FALSE,
     metadata TEXT,
     created_by TEXT NOT NULL,
     updated_by TEXT,
@@ -26,3 +30,6 @@ CREATE INDEX IF NOT EXISTS idx_content_type ON content(type);
 CREATE INDEX IF NOT EXISTS idx_content_is_active ON content(is_active);
 CREATE INDEX IF NOT EXISTS idx_content_position ON content(position);
 CREATE INDEX IF NOT EXISTS idx_content_created_by ON content(created_by);
+CREATE INDEX IF NOT EXISTS idx_content_display_menu ON content(display_menu);
+CREATE INDEX IF NOT EXISTS idx_content_display_footer ON content(display_footer);
+CREATE INDEX IF NOT EXISTS idx_content_display_modal ON content(display_modal);

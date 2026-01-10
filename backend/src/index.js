@@ -17,6 +17,7 @@ import instagramRoutes from './routes/instagram.js';
 import emailRoutes from './routes/email.js';
 import reservationRoutes from './routes/reservations.js';
 import searchRoutes from './routes/search.js';
+import whatsappRoutes from './routes/whatsapp.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -48,6 +49,7 @@ app.use('/api/instagram', instagramRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/reservations', reservationRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/webhooks/whatsapp', whatsappRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

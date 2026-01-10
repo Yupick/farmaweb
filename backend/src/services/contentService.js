@@ -7,7 +7,10 @@ export async function getPublicContent() {
     `SELECT * FROM content WHERE is_active = 1 ORDER BY type, position ASC`
   );
 
-  return content;
+  return content.map(item => ({
+    ...item,
+    data: item.data ? JSON.parse(item.data) : null
+  }));
 }
 
 export async function getContentById(contentId) {
@@ -22,7 +25,10 @@ export async function getContentById(contentId) {
     throw new Error('Contenido no encontrado');
   }
 
-  return content;
+  return {
+    ...content,
+    data: content.data ? JSON.parse(content.data) : null
+  };
 }
 
 export async function getContentByType(type) {
@@ -33,7 +39,10 @@ export async function getContentByType(type) {
     [type]
   );
 
-  return content;
+  return content.map(item => ({
+    ...item,
+    data: item.data ? JSON.parse(item.data) : null
+  }));
 }
 
 export async function getPageBySlug(slug) {
@@ -51,16 +60,19 @@ export async function getPageBySlug(slug) {
     throw new Error('Página no encontrada');
   }
 
-  return page;
+  return {
+    ...page,
+    data: page.data ? JSON.parse(page.data) : null
+  };
 }
 
-export async function createContent(type, title, description, imageUrl, data, position) {
+export async function createContent(type, title, description, imageUrl, data, position, display_modal = 0, display_footer = 0, display_menu = 0) {
   const db = await getDatabase();
   
   const result = await db.run(
-    `INSERT INTO content (type, title, description, image_url, data, position, is_active)
-     VALUES (?, ?, ?, ?, ?, ?, 1)`,
-    [type, title, description, imageUrl, JSON.stringify(data || {}), position || 0]
+    `INSERT INTO content (type, title, description, image_url, data, position, is_active, display_modal, display_footer, display_menu)
+     VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?)`,
+    [type, title, description, imageUrl, JSON.stringify(data || {}), position || 0, display_modal ? 1 : 0, display_footer ? 1 : 0, display_menu ? 1 : 0]
   );
 
   return getContentById(result.lastID);
@@ -69,7 +81,7 @@ export async function createContent(type, title, description, imageUrl, data, po
 export async function updateContent(contentId, updates) {
   const db = await getDatabase();
   
-  const allowedFields = ['type', 'title', 'description', 'image_url', 'data', 'position', 'is_active'];
+  const allowedFields = ['type', 'title', 'description', 'image_url', 'data', 'position', 'is_active', 'display_modal', 'display_footer', 'display_menu'];
   const fieldsToUpdate = [];
   const values = [];
 
@@ -77,7 +89,13 @@ export async function updateContent(contentId, updates) {
     const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
     if (allowedFields.includes(dbKey)) {
       fieldsToUpdate.push(`${dbKey} = ?`);
-      values.push(dbKey === 'data' ? JSON.stringify(value) : value);
+      if (dbKey === 'data') {
+        values.push(JSON.stringify(value));
+      } else if (dbKey === 'display_modal' || dbKey === 'display_footer' || dbKey === 'display_menu') {
+        values.push(value ? 1 : 0);
+      } else {
+        values.push(value);
+      }
     }
   }
 

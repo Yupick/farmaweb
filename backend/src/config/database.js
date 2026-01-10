@@ -185,5 +185,23 @@ export async function runSchema() {
     CREATE INDEX IF NOT EXISTS idx_instagram_timestamp ON instagram_posts(timestamp);
   `);
 
+  // Ensure new display columns exist in content table
+  try {
+    const columns = await db.all(`PRAGMA table_info(content)`);
+    const colNames = new Set(columns.map(c => c.name));
+    const toAdd = [];
+    if (!colNames.has('display_modal')) toAdd.push('ALTER TABLE content ADD COLUMN display_modal INTEGER DEFAULT 0');
+    if (!colNames.has('display_footer')) toAdd.push('ALTER TABLE content ADD COLUMN display_footer INTEGER DEFAULT 0');
+    if (!colNames.has('display_menu')) toAdd.push('ALTER TABLE content ADD COLUMN display_menu INTEGER DEFAULT 0');
+    for (const stmt of toAdd) {
+      try { await db.exec(stmt); } catch (e) { /* ignore if exists or unsupported */ }
+    }
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_content_display_menu ON content(display_menu);`);
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_content_display_footer ON content(display_footer);`);
+    await db.exec(`CREATE INDEX IF NOT EXISTS idx_content_display_modal ON content(display_modal);`);
+  } catch (e) {
+    // ignore
+  }
+
   return db;
 }

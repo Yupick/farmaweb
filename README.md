@@ -9,12 +9,22 @@
 ## 📋 Descripción del Proyecto
 
 Sistema integral para la Farmacia Científica Malvinas que integra:
-- **Landing Page dinámica** con soporte de themes y carruseles
-- **Panel de Administración** robusto y flexible
-- **Chatbot inteligente** en WhatsApp con LLM configurable (Groq/OpenAI)
+- **Landing Page dinámica** con contenido editable y páginas internas
+- **Panel de Administración** robusto con gestión completa de contenidos
+- **Chatbot inteligente WhatsApp** con IA (Groq/OpenAI) - ✅ **IMPLEMENTADO**
+- **Chatbot Administrativo** con acceso a base de datos
 - **Integración con Instagram** para mostrar últimos posts
+- **Sistema de páginas dinámicas** con opciones de modal, menú y footer
 - **Base de datos** SQLite con modelos de usuario, productos, conversaciones y configuraciones
 - **Preparación para tienda online** con estructura de roles y productos
+
+### 🆕 Características Destacadas
+
+- 🤖 **IA Configurable**: Soporte para Groq y OpenAI con modelos personalizables
+- 💬 **WhatsApp Multi-Proveedor**: Meta Cloud API y Twilio integrados
+- 🎨 **Contenido Dinámico**: Sistema de gestión de contenido con asistente IA
+- 🔐 **Sistema de Autenticación**: JWT con roles y permisos
+- 📱 **Responsive Design**: Interfaz adaptable a todos los dispositivos
 
 ---
 
@@ -101,15 +111,79 @@ farmaweb/
 
 ---
 
+## � Inicio Rápido
+
+### 1. Instalar Dependencias e Iniciar Servicios
+
+```bash
+# Iniciar backend y frontend automáticamente
+./start-services.sh
+
+# Los servicios estarán disponibles en:
+# - Backend:  http://localhost:3001
+# - Frontend: http://localhost:3000
+```
+
+### 2. Configurar WhatsApp con IA
+
+```bash
+# Opción A: Configuración rápida desde terminal
+./setup-whatsapp.sh
+
+# Opción B: Configuración desde panel admin
+# 1. Accede a http://localhost:3000/login
+# 2. Usuario: admin@fciacientifica.com.ar
+# 3. Contraseña: cientifica123
+# 4. Ve a Configuraciones → WhatsApp
+```
+
+### 3. Exponer Backend para WhatsApp
+
+```bash
+# Instalar ngrok (si no lo tienes)
+brew install ngrok  # macOS
+# o descarga desde https://ngrok.com
+
+# Exponer puerto 3001
+ngrok http 3001
+```
+
+### 4. Probar Integración
+
+```bash
+# Test completo de WhatsApp
+./test-whatsapp.sh
+
+# Ver logs en tiempo real
+./view-logs.sh
+```
+
+---
+
 ## 📚 Documentación
 
 Consulta los siguientes documentos para más información:
 
 - [ROADMAP.md](docs/ROADMAP.md) - Plan detallado de desarrollo
+- [WHATSAPP_SETUP.md](docs/WHATSAPP_SETUP.md) - **Guía completa de WhatsApp** ⭐
+- [WHATSAPP_ARCHITECTURE.md](docs/WHATSAPP_ARCHITECTURE.md) - Arquitectura de WhatsApp + IA
 - [ARCHITECTURE.md](docs/ARCHITECTURE.md) - Arquitectura técnica del sistema
 - [DATABASE.md](docs/DATABASE.md) - Esquema de base de datos
 - [API.md](docs/API.md) - Documentación de endpoints
-- [SETUP.md](docs/SETUP.md) - Guía de instalación
+- [SETUP.md](docs/SETUP.md) - Guía de instalación detallada
+
+---
+
+## 🔧 Scripts Disponibles
+
+```bash
+./start-services.sh        # Inicia backend y frontend
+./stop-services.sh         # Detiene todos los servicios
+./view-logs.sh             # Ver logs en tiempo real
+./setup-whatsapp.sh        # Configuración rápida de WhatsApp
+./test-whatsapp.sh         # Pruebas de integración WhatsApp
+./test_project.sh          # Tests del proyecto
+```
 
 ---
 

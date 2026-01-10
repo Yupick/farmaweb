@@ -47,13 +47,23 @@ export async function getPageBySlug(req, res) {
 
 export async function createContent(req, res) {
   try {
-    const { type, title, description, imageUrl, data, position } = req.body;
+    const { type, title, description, imageUrl, data, position, display_modal, display_footer, display_menu } = req.body;
 
     if (!type) {
       return res.status(400).json({ error: 'Tipo de contenido requerido' });
     }
 
-    const content = await contentService.createContent(type, title, description, imageUrl, data, position);
+    const content = await contentService.createContent(
+      type,
+      title,
+      description,
+      imageUrl,
+      data,
+      position,
+      display_modal,
+      display_footer,
+      display_menu
+    );
     res.status(201).json(content);
   } catch (error) {
     res.status(500).json({ error: error.message });

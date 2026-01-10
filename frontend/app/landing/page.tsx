@@ -12,12 +12,20 @@ interface ContentItem {
   description: string
   image_url: string
   position: number
+  data?: { slug?: string; body?: string } | string
+  display_modal?: number
+  display_footer?: number
+  display_menu?: number
 }
 
 export default function Home() {
   const [content, setContent] = useState<{ [key: string]: ContentItem[] }>({})
   const [isLoading, setIsLoading] = useState(true)
   const [config, setConfig] = useState<any>({})
+  const [menuPages, setMenuPages] = useState<Array<{ title: string; slug: string; display_modal: boolean }>>([])
+  const [footerPages, setFooterPages] = useState<Array<{ title: string; slug: string; display_modal: boolean }>>([])
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalContent, setModalContent] = useState<{ title: string; body: string } | null>(null)
 
   useEffect(() => {
     fetchContent()
@@ -32,18 +40,33 @@ export default function Home() {
       
       // Organizar contenido por tipo
       const organized: { [key: string]: ContentItem[] } = {}
+      const pagesForMenu: Array<{ title: string; slug: string; display_modal: boolean; position: number }> = []
+      const pagesForFooter: Array<{ title: string; slug: string; display_modal: boolean; position: number }> = []
       contentRes.data.forEach((item: ContentItem) => {
         if (!organized[item.type]) {
           organized[item.type] = []
         }
-        organized[item.type].push(item)
+        // parse data JSON if string
+        let dataObj: any = item.data
+        if (typeof dataObj === 'string') {
+          try { dataObj = JSON.parse(dataObj) } catch {}
+        }
+        const parsedItem: ContentItem = { ...item, data: dataObj }
+        organized[item.type].push(parsedItem)
+        if (item.type === 'page' && dataObj?.slug) {
+          const link = { title: item.title || dataObj.slug, slug: dataObj.slug, display_modal: !!item.display_modal, position: item.position || 0 }
+          if (item.display_menu) pagesForMenu.push(link)
+          if (item.display_footer) pagesForFooter.push(link)
+        }
       })
       
       setContent(organized)
-      // parse links json from config
+      // ordenar por posición y guardar
+      pagesForMenu.sort((a, b) => a.position - b.position)
+      pagesForFooter.sort((a, b) => a.position - b.position)
+      setMenuPages(pagesForMenu.map(p => ({ title: p.title, slug: p.slug, display_modal: p.display_modal })))
+      setFooterPages(pagesForFooter.map(p => ({ title: p.title, slug: p.slug, display_modal: p.display_modal })))
       const cfg = configRes.data || {}
-      try { if (typeof cfg.header_links === 'string') cfg.header_links = JSON.parse(cfg.header_links) } catch {}
-      try { if (typeof cfg.footer_links === 'string') cfg.footer_links = JSON.parse(cfg.footer_links) } catch {}
       setConfig(cfg)
     } catch (error) {
       console.error('Error al cargar contenido:', error)
@@ -75,8 +98,23 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-blue-600">{config.pharmacy_name || 'Farmacia Científica'}</h1>
           <div className="flex space-x-4">
-            {(config.header_links || []).map((lnk: any) => (
-              <Link key={lnk.slug} href={`/pages/${lnk.slug}`} className="text-gray-600 hover:text-blue-600">{lnk.label}</Link>
+            {menuPages.map((p) => (
+              p.display_modal ? (
+                <button
+                  key={p.slug}
+                  onClick={() => {
+                    const page = content.page?.find(it => (it.data as any)?.slug === p.slug)
+                    const body = (page?.data as any)?.body || ''
+                    setModalContent({ title: page?.title || p.slug, body })
+                    setModalOpen(true)
+                  }}
+                  className="text-gray-600 hover:text-blue-600"
+                >
+                  {p.title}
+                </button>
+              ) : (
+                <Link key={p.slug} href={`/pages/${p.slug}`} className="text-gray-600 hover:text-blue-600">{p.title}</Link>
+              )
             ))}
             <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Acceso</Link>
           </div>
@@ -221,9 +259,23 @@ export default function Home() {
             <div>
               <h4 className="text-lg font-bold mb-4">Enlaces</h4>
               <ul className="space-y-2 text-gray-400">
-                {(config.footer_links || []).map((lnk: any) => (
-                  <li key={lnk.slug}>
-                    <Link href={`/pages/${lnk.slug}`} className="hover:text-white">{lnk.label}</Link>
+                {footerPages.map((p) => (
+                  <li key={p.slug}>
+                    {p.display_modal ? (
+                      <button
+                        onClick={() => {
+                          const page = content.page?.find(it => (it.data as any)?.slug === p.slug)
+                          const body = (page?.data as any)?.body || ''
+                          setModalContent({ title: page?.title || p.slug, body })
+                          setModalOpen(true)
+                        }}
+                        className="hover:text-white"
+                      >
+                        {p.title}
+                      </button>
+                    ) : (
+                      <Link href={`/pages/${p.slug}`} className="hover:text-white">{p.title}</Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -244,6 +296,17 @@ export default function Home() {
         </div>
       </footer>
 
+      {/* Modal for Page */}
+      {modalOpen && modalContent && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-50" onClick={() => setModalOpen(false)}></div>
+          <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-11/12 md:w-2/3 p-6">
+            <button className="absolute top-3 right-3 text-gray-600 hover:text-gray-800" onClick={() => setModalOpen(false)}>✕</button>
+            <h3 className="text-2xl font-bold mb-4">{modalContent.title}</h3>
+            <div className="prose max-w-none" dangerouslySetInnerHTML={{ __html: modalContent.body }}></div>
+          </div>
+        </div>
+      )}
       {/* Floating Chat Button */}
       <FloatingChatButton />
     </div>
