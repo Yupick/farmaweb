@@ -36,6 +36,24 @@ export async function getContentByType(type) {
   return content;
 }
 
+export async function getPageBySlug(slug) {
+  const db = await getDatabase();
+  // Buscar páginas por coincidencia en JSON data (slug)
+  const page = await db.get(
+    `SELECT * FROM content WHERE type = 'page' AND is_active = 1 AND (data LIKE ? OR data LIKE ?) LIMIT 1`,
+    [
+      `%"slug":"${slug}"%`,
+      `%"slug": "${slug}"%`
+    ]
+  );
+
+  if (!page) {
+    throw new Error('Página no encontrada');
+  }
+
+  return page;
+}
+
 export async function createContent(type, title, description, imageUrl, data, position) {
   const db = await getDatabase();
   

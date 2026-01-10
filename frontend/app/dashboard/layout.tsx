@@ -78,6 +78,24 @@ export default function DashboardLayout({
                     Usuarios
                   </Link>
                   <Link
+                    href="/dashboard/content"
+                    className="block px-3 py-2 text-sm text-gray-700 rounded hover:bg-gray-100"
+                  >
+                    Contenido
+                  </Link>
+                  <Link
+                    href="/dashboard/chat"
+                    className="block px-3 py-2 text-sm text-gray-700 rounded hover:bg-gray-100"
+                  >
+                    Chat WhatsApp
+                  </Link>
+                  <Link
+                    href="/dashboard/admin-chat"
+                    className="block px-3 py-2 text-sm text-gray-700 rounded hover:bg-blue-50 text-blue-700 font-medium"
+                  >
+                    🤖 Chatbot Admin
+                  </Link>
+                  <Link
                     href="/dashboard/config"
                     className="block px-3 py-2 text-sm text-gray-700 rounded hover:bg-gray-100"
                   >

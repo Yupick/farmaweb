@@ -1,6 +1,4 @@
-import './styles.css'
-
-export default {
+module.exports = {
   plugins: {
     tailwindcss: {},
     autoprefixer: {},

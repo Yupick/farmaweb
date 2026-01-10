@@ -63,7 +63,7 @@ export async function getChatMessages(conversationId, limit = 100) {
 
 export async function getAIResponseFromLLM(userMessage, conversationId) {
   try {
-    const response = await getAIResponse(userMessage);
+    const response = await getAIResponse(userMessage, '', 'whatsapp');
     
     return {
       id: Date.now(),

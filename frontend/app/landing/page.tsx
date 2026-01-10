@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import Link from 'next/link'
+import FloatingChatButton from '@/app/components/FloatingChatButton'
 
 interface ContentItem {
   id: number
@@ -16,6 +17,7 @@ interface ContentItem {
 export default function Home() {
   const [content, setContent] = useState<{ [key: string]: ContentItem[] }>({})
   const [isLoading, setIsLoading] = useState(true)
+  const [config, setConfig] = useState<any>({})
 
   useEffect(() => {
     fetchContent()
@@ -23,11 +25,14 @@ export default function Home() {
 
   const fetchContent = async () => {
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/content`)
+      const [contentRes, configRes] = await Promise.all([
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/content`),
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/config`)
+      ])
       
       // Organizar contenido por tipo
       const organized: { [key: string]: ContentItem[] } = {}
-      response.data.forEach((item: ContentItem) => {
+      contentRes.data.forEach((item: ContentItem) => {
         if (!organized[item.type]) {
           organized[item.type] = []
         }
@@ -35,6 +40,11 @@ export default function Home() {
       })
       
       setContent(organized)
+      // parse links json from config
+      const cfg = configRes.data || {}
+      try { if (typeof cfg.header_links === 'string') cfg.header_links = JSON.parse(cfg.header_links) } catch {}
+      try { if (typeof cfg.footer_links === 'string') cfg.footer_links = JSON.parse(cfg.footer_links) } catch {}
+      setConfig(cfg)
     } catch (error) {
       console.error('Error al cargar contenido:', error)
     } finally {
@@ -63,14 +73,12 @@ export default function Home() {
       {/* Navbar */}
       <nav className="sticky top-0 bg-white shadow-md z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-blue-600">Farmacia Científica</h1>
+          <h1 className="text-2xl font-bold text-blue-600">{config.pharmacy_name || 'Farmacia Científica'}</h1>
           <div className="flex space-x-4">
-            <a href="#sobre" className="text-gray-600 hover:text-blue-600">Sobre</a>
-            <a href="#productos" className="text-gray-600 hover:text-blue-600">Productos</a>
-            <a href="#contacto" className="text-gray-600 hover:text-blue-600">Contacto</a>
-            <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Acceso
-            </Link>
+            {(config.header_links || []).map((lnk: any) => (
+              <Link key={lnk.slug} href={`/pages/${lnk.slug}`} className="text-gray-600 hover:text-blue-600">{lnk.label}</Link>
+            ))}
+            <Link href="/login" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Acceso</Link>
           </div>
         </div>
       </nav>
@@ -81,8 +89,8 @@ export default function Home() {
           <div className="max-w-6xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
               <div>
-                <h2 className="text-5xl font-bold mb-4">{hero.title}</h2>
-                <p className="text-xl mb-6">{hero.description}</p>
+                <h2 className="text-5xl font-bold mb-4">{hero.title || config.pharmacy_name}</h2>
+                <p className="text-xl mb-6">{hero.description || config.pharmacy_slogan}</p>
                 <button className="px-8 py-3 bg-white text-blue-600 font-bold rounded hover:bg-gray-100">
                   Conocer más
                 </button>
@@ -207,31 +215,37 @@ export default function Home() {
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">Farmacia Científica</h3>
-              <p className="text-gray-400">Tu farmacia de confianza en línea</p>
+              <h3 className="text-xl font-bold mb-4">{config.pharmacy_name || 'Farmacia Científica'}</h3>
+              <p className="text-gray-400">{config.pharmacy_slogan || 'Tu farmacia de confianza en línea'}</p>
             </div>
             <div>
               <h4 className="text-lg font-bold mb-4">Enlaces</h4>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white">Sobre nosotros</a></li>
-                <li><a href="#" className="hover:text-white">Productos</a></li>
-                <li><a href="#" className="hover:text-white">Contacto</a></li>
+                {(config.footer_links || []).map((lnk: any) => (
+                  <li key={lnk.slug}>
+                    <Link href={`/pages/${lnk.slug}`} className="hover:text-white">{lnk.label}</Link>
+                  </li>
+                ))}
               </ul>
             </div>
             <div>
               <h4 className="text-lg font-bold mb-4">Información</h4>
               <ul className="space-y-2 text-gray-400">
-                <li>Email: info@fciacientifica.com.ar</li>
-                <li>Teléfono: +54 9 1234 5678</li>
-                <li>Dirección: Buenos Aires, Argentina</li>
+                <li>Email: {config.pharmacy_email || 'info@fciacientifica.com.ar'}</li>
+                <li>Teléfono: {config.pharmacy_phone || '+54 9 1234 5678'}</li>
+                <li>WhatsApp: {config.pharmacy_whatsapp || '+54 9 11 1234-5678'}</li>
+                <li>Dirección: {config.pharmacy_address || 'Buenos Aires, Argentina'}</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-gray-800 pt-8 text-center text-gray-400">
-            <p>&copy; 2026 Farmacia Científica. Todos los derechos reservados.</p>
+            <p>&copy; 2026 {config.pharmacy_name || 'Farmacia Científica'}. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
+
+      {/* Floating Chat Button */}
+      <FloatingChatButton />
     </div>
   )
 }

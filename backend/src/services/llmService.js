@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { getDatabase } from '../config/database.js';
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 // Preguntas frecuentes y respuestas por defecto
 const FAQ = {
@@ -19,65 +20,106 @@ const DEFAULT_RESPONSES = [
   'Para más información detallada, por favor contacta con nuestro equipo.',
 ];
 
-export async function getAIResponse(message: string, conversationContext: string = '') {
+async function getLLMSettings(promptType = 'admin') {
+  const db = await getDatabase();
+  const keys = promptType === 'admin' 
+    ? ['llm_provider','groq_api_key','openai_api_key','llm_system_prompt','llm_model_groq','llm_model_openai']
+    : ['llm_provider','groq_api_key','openai_api_key','whatsapp_system_prompt','llm_model_groq','llm_model_openai'];
+  
+  const rows = await db.all(`SELECT key, value FROM configurations WHERE key IN (${keys.map(() => '?').join(',')})`,[...keys]);
+  const map = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  
+  const provider = (map['llm_provider'] || 'groq').toLowerCase();
+  const promptKey = promptType === 'admin' ? 'llm_system_prompt' : 'whatsapp_system_prompt';
+  const defaultPrompt = promptType === 'admin' 
+    ? 'Eres un asistente administrativo de Farmacia Científica Malvinas. Responde brevemente en español y con precisión. Si no tienes datos, sugiere cómo obtenerlos desde el sistema.'
+    : 'Eres un asistente amable de farmacia para Farmacia Científica Malvinas. Responde brevemente en español (máximo 100 palabras). Si no puedes responder, sugiere contactar al equipo de farmacia.';
+  
+  return {
+    provider: provider,
+    groqKey: map['groq_api_key'] || '',
+    openaiKey: map['openai_api_key'] || '',
+    systemPrompt: map[promptKey] || defaultPrompt,
+    groqModel: map['llm_model_groq'] || 'mixtral-8x7b-32768',
+    openaiModel: map['llm_model_openai'] || 'gpt-3.5-turbo'
+  };
+}
+
+export async function getAIResponse(message, conversationContext = '', promptType = 'whatsapp') {
   try {
     // Detectar palabras clave en el mensaje
     const messageLower = message.toLowerCase();
     
-    // Respuestas por FAQ
-    if (messageLower.includes('horario') || messageLower.includes('cuando')) {
-      return FAQ.horarios;
-    }
-    if (messageLower.includes('ubicacion') || messageLower.includes('donde') || messageLower.includes('dirección')) {
-      return FAQ.ubicacion;
-    }
-    if (messageLower.includes('producto') || messageLower.includes('medicamento')) {
-      return FAQ.productos;
-    }
-    if (messageLower.includes('envio') || messageLower.includes('delivery')) {
-      return FAQ.envios;
-    }
-    if (messageLower.includes('reserva') || messageLower.includes('reservacion')) {
-      return FAQ.reservas;
-    }
-    if (messageLower.includes('contacto') || messageLower.includes('contactar')) {
-      return FAQ.contacto;
+    // Respuestas por FAQ (para WhatsApp)
+    if (promptType === 'whatsapp') {
+      if (messageLower.includes('horario') || messageLower.includes('cuando')) {
+        return FAQ.horarios;
+      }
+      if (messageLower.includes('ubicacion') || messageLower.includes('donde') || messageLower.includes('dirección')) {
+        return FAQ.ubicacion;
+      }
+      if (messageLower.includes('producto') || messageLower.includes('medicamento')) {
+        return FAQ.productos;
+      }
+      if (messageLower.includes('envio') || messageLower.includes('delivery')) {
+        return FAQ.envios;
+      }
+      if (messageLower.includes('reserva') || messageLower.includes('reservacion')) {
+        return FAQ.reservas;
+      }
+      if (messageLower.includes('contacto') || messageLower.includes('contactar')) {
+        return FAQ.contacto;
+      }
     }
 
-    // Si hay API key de Groq, usar IA
-    if (GROQ_API_KEY && GROQ_API_KEY !== '') {
+    // Configurable LLM provider & system prompt
+    const settings = await getLLMSettings(promptType);
+    const systemPrompt = settings.systemPrompt;
+
+    if (settings.provider === 'groq' && settings.groqKey) {
       const response = await axios.post(
         GROQ_API_URL,
         {
-          model: 'mixtral-8x7b-32768', // Modelo disponible en Groq
+          model: settings.groqModel,
           messages: [
-            {
-              role: 'system',
-              content: `Eres un asistente amable de farmacia para Farmacia Científica Malvinas. Responde brevemente en español (máximo 100 palabras). 
-Si no puedes responder, sugiere contactar al equipo de farmacia.
-Información de la farmacia:
-- Horarios: Lunes-Viernes 8:00-18:00, Sábados 8:00-13:00
-- Ubicación: Centro farmacéutico de Malvinas
-- Servicios: Venta de medicamentos, suplementos, asesoramiento farmacéutico, envíos a domicilio`
-            },
-            {
-              role: 'user',
-              content: message
-            }
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
           ],
           temperature: 0.7,
           max_tokens: 150,
         },
         {
           headers: {
-            'Authorization': `Bearer ${GROQ_API_KEY}`,
+            'Authorization': `Bearer ${settings.groqKey}`,
             'Content-Type': 'application/json',
           },
-          timeout: 5000
+          timeout: 8000
         }
       );
+      return response.data.choices?.[0]?.message?.content || getDefaultResponse();
+    }
 
-      return response.data.choices[0]?.message?.content || getDefaultResponse();
+    if (settings.provider === 'openai' && settings.openaiKey) {
+      const response = await axios.post(
+        OPENAI_API_URL,
+        {
+          model: settings.openaiModel,
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: message }
+          ],
+          temperature: 0.7,
+          max_tokens: 150,
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${settings.openaiKey}`,
+            'Content-Type': 'application/json',
+          },
+          timeout: 8000
+        }
+      );
+      return response.data.choices?.[0]?.message?.content || getDefaultResponse();
     }
 
     // Fallback: respuesta por defecto
@@ -89,12 +131,12 @@ Información de la farmacia:
 }
 
 // Obtener respuesta por defecto aleatoria
-function getDefaultResponse(): string {
+function getDefaultResponse() {
   return DEFAULT_RESPONSES[Math.floor(Math.random() * DEFAULT_RESPONSES.length)];
 }
 
 // Validar mensaje
-export function validateMessage(message: string): { valid: boolean; error?: string } {
+export function validateMessage(message) {
   if (!message || message.trim().length === 0) {
     return { valid: false, error: 'El mensaje no puede estar vacío' };
   }
@@ -105,7 +147,7 @@ export function validateMessage(message: string): { valid: boolean; error?: stri
 }
 
 // Generar contexto de conversación
-export function generateConversationContext(messages: Array<{ sender: string; message: string }>): string {
+export function generateConversationContext(messages) {
   return messages
     .slice(-5) // Últimos 5 mensajes
     .map(msg => `${msg.sender}: ${msg.message}`)
@@ -113,10 +155,10 @@ export function generateConversationContext(messages: Array<{ sender: string; me
 }
 
 // Detectar intención del usuario
-export function detectUserIntent(message: string): string {
+export function detectUserIntent(message) {
   const messageLower = message.toLowerCase();
   
-  const intents: { [key: string]: string[] } = {
+  const intents = {
     horarios: ['horario', 'cuando', 'abierto', 'hora', 'atienden'],
     ubicacion: ['donde', 'ubicacion', 'dirección', 'local', 'farmacia'],
     productos: ['producto', 'medicamento', 'droga', 'comprar', 'vender', 'tienen'],

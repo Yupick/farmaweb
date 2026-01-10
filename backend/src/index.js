@@ -2,7 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { runSchema, seedDatabase } from './config/database.js';
+import { runSchema, initializeDatabase } from './config/database.js';
+import { seedDatabase } from './services/seedService.js';
 import { errorHandler } from './middleware/auth.js';
 
 // Importar rutas
@@ -84,7 +85,7 @@ async function startServer() {
 
     console.log('⏳ Cargando datos iniciales...');
     await seedDatabase();
-    console.log('✅ Base de datos inicializada con datos iniciales');
+    console.log('✅ Base de datos inicializada');
 
     app.listen(PORT, () => {
       console.log(`

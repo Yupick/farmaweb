@@ -27,10 +27,18 @@ export default function ContentManagement() {
     description: '',
     image_url: '',
     position: 0,
-    is_active: 1
+    is_active: 1,
+    data: { slug: '', body: '' }
   })
 
-  const contentTypes = ['hero', 'banner', 'featured', 'carousel']
+  const contentTypes = [
+    { id: 'hero', label: 'Hero (encabezado principal)' },
+    { id: 'banner', label: 'Banner (tarjetas destacadas)' },
+    { id: 'featured', label: 'Destacado (sección productos)' },
+    { id: 'carousel', label: 'Galería (imágenes)' },
+    { id: 'page', label: 'Página (contenido interno con slug)' }
+  ]
+  const isPage = formData.type === 'page'
 
   useEffect(() => {
     fetchContent()
@@ -51,17 +59,19 @@ export default function ContentManagement() {
     e.preventDefault()
     try {
       if (editingId) {
+        const payload = { ...formData, data: isPage ? formData.data : undefined }
         await axios.put(
           `${process.env.NEXT_PUBLIC_API_URL}/content/${editingId}`,
-          formData,
+          payload,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
         )
       } else {
+        const payload = { ...formData, data: isPage ? formData.data : undefined }
         await axios.post(
           `${process.env.NEXT_PUBLIC_API_URL}/content`,
-          formData,
+          payload,
           {
             headers: { Authorization: `Bearer ${token}` }
           }
@@ -107,7 +117,8 @@ export default function ContentManagement() {
       description: '',
       image_url: '',
       position: 0,
-      is_active: 1
+      is_active: 1,
+      data: { slug: '', body: '' }
     })
     setEditingId(null)
     setShowForm(false)
@@ -137,16 +148,50 @@ export default function ContentManagement() {
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-6 p-6 bg-white rounded shadow">
+          {/* Asistencia IA para crear/editar páginas */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded">
+            <p className="text-sm text-blue-900 mb-2 font-semibold">Asistente IA (Chatbot Administrativo)</p>
+            <p className="text-xs text-blue-800 mb-3">Describe el contenido que quieres crear o editar (por ejemplo: "Crear página de Políticas con secciones de privacidad y devoluciones").</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-2 items-start">
+              <textarea id="ia-prompt" className="md:col-span-3 w-full px-3 py-2 border rounded" rows={3} placeholder="Indica el contenido deseado..." />
+              <button
+                type="button"
+                onClick={async ()=>{
+                  const prompt = (document.getElementById('ia-prompt') as HTMLTextAreaElement)?.value || ''
+                  if(!prompt) return
+                  try {
+                    const res = await axios.post(
+                      `${process.env.NEXT_PUBLIC_API_URL}/chat/admin`,
+                      { message: prompt },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    )
+                    const txt = res.data?.response || ''
+                    // Rellenar descripción/cuerpo con la respuesta IA
+                    if (isPage) {
+                      setFormData(prev => ({ ...prev, description: txt.substring(0, 160), data: { ...prev.data, body: txt } }))
+                    } else {
+                      setFormData(prev => ({ ...prev, description: txt }))
+                    }
+                  } catch (e) {
+                    setError('No se pudo obtener asistencia de IA')
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Generar con IA
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value, data: { slug: '', body: '' } })}
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               >
-                {contentTypes.map((type) => (
-                  <option key={type} value={type}>{type}</option>
+                {contentTypes.map((t) => (
+                  <option key={t.id} value={t.id}>{t.label}</option>
                 ))}
               </select>
             </div>
@@ -187,6 +232,31 @@ export default function ContentManagement() {
                 className="w-full px-3 py-2 border border-gray-300 rounded"
               />
             </div>
+            {isPage && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                  <input
+                    type="text"
+                    value={formData.data.slug}
+                    onChange={(e) => setFormData({ ...formData, data: { ...formData.data, slug: e.target.value } })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                    placeholder="ej: politicas"
+                    required
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Cuerpo (HTML simple)</label>
+                  <textarea
+                    value={formData.data.body}
+                    onChange={(e) => setFormData({ ...formData, data: { ...formData.data, body: e.target.value } })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                    rows={8}
+                    placeholder="<h2>Título</h2><p>Contenido...</p>"
+                  />
+                </div>
+              </>
+            )}
             <div>
               <label className="flex items-center">
                 <input

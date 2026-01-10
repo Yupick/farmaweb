@@ -6,6 +6,8 @@ const router = express.Router();
 
 // Obtener contenido público (sin autenticación)
 router.get('/', contentController.getPublicContent);
+// Página por slug (debe ir antes de rutas con :id)
+router.get('/page/slug/:slug', contentController.getPageBySlug);
 router.get('/:id', contentController.getContentById);
 
 // Crear/Actualizar/Eliminar contenido (solo admin)

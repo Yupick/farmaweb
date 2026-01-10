@@ -32,6 +32,19 @@ export async function getContentByType(req, res) {
   }
 }
 
+export async function getPageBySlug(req, res) {
+  try {
+    const { slug } = req.params;
+    const page = await contentService.getPageBySlug(slug);
+    res.json(page);
+  } catch (error) {
+    if (error.message === 'Página no encontrada') {
+      return res.status(404).json({ error: error.message });
+    }
+    res.status(500).json({ error: error.message });
+  }
+}
+
 export async function createContent(req, res) {
   try {
     const { type, title, description, imageUrl, data, position } = req.body;

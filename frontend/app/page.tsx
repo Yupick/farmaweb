@@ -11,7 +11,9 @@ export default function Home() {
 
   useEffect(() => {
     if (!isLoading && !user) {
-      router.push('/login')
+      router.push('/landing')
+    } else if (!isLoading && user) {
+      router.push('/dashboard')
     }
   }, [user, isLoading, router])
 
@@ -73,6 +75,30 @@ export default function Home() {
                   >
                     <h3 className="text-lg font-semibold text-blue-900 mb-2">Gestionar Usuarios</h3>
                     <p className="text-blue-700">Crear, editar y eliminar usuarios del sistema</p>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/content"
+                    className="p-6 bg-orange-50 border border-orange-200 rounded-lg hover:shadow-md transition"
+                  >
+                    <h3 className="text-lg font-semibold text-orange-900 mb-2">Contenido</h3>
+                    <p className="text-orange-700">Gestionar contenido de la landing page</p>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/chat"
+                    className="p-6 bg-cyan-50 border border-cyan-200 rounded-lg hover:shadow-md transition"
+                  >
+                    <h3 className="text-lg font-semibold text-cyan-900 mb-2">Chat WhatsApp</h3>
+                    <p className="text-cyan-700">Ver conversaciones de clientes</p>
+                  </Link>
+
+                  <Link
+                    href="/dashboard/admin-chat"
+                    className="p-6 bg-indigo-50 border border-indigo-200 rounded-lg hover:shadow-md transition"
+                  >
+                    <h3 className="text-lg font-semibold text-indigo-900 mb-2">🤖 Chatbot Admin</h3>
+                    <p className="text-indigo-700">Asistente IA para consultas y gestión</p>
                   </Link>
 
                   <Link
