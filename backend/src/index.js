@@ -10,6 +10,12 @@ import authRoutes from './routes/auth.js';
 import usersRoutes from './routes/users.js';
 import configRoutes from './routes/config.js';
 import auditRoutes from './routes/audit.js';
+import contentRoutes from './routes/content.js';
+import chatRoutes from './routes/chat.js';
+import instagramRoutes from './routes/instagram.js';
+import emailRoutes from './routes/email.js';
+import reservationRoutes from './routes/reservations.js';
+import searchRoutes from './routes/search.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -35,6 +41,12 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/config', configRoutes);
 app.use('/api/audit', auditRoutes);
+app.use('/api/content', contentRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/instagram', instagramRoutes);
+app.use('/api/email', emailRoutes);
+app.use('/api/reservations', reservationRoutes);
+app.use('/api/search', searchRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

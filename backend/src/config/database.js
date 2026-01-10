@@ -97,6 +97,78 @@ export async function runSchema() {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS chat_conversations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      phone_number TEXT NOT NULL,
+      user_name TEXT,
+      status TEXT DEFAULT 'active',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS chat_messages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      conversation_id INTEGER NOT NULL,
+      sender TEXT NOT NULL,
+      message TEXT,
+      message_type TEXT DEFAULT 'text',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (conversation_id) REFERENCES chat_conversations(id)
+    );
+
+    CREATE TABLE IF NOT EXISTS reservations (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      phone_number TEXT NOT NULL,
+      email TEXT,
+      product_id INTEGER,
+      quantity INTEGER NOT NULL,
+      notes TEXT,
+      status TEXT DEFAULT 'pending',
+      cancellation_reason TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS products (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT,
+      sku TEXT UNIQUE,
+      category TEXT,
+      brand TEXT,
+      price DECIMAL(10, 2),
+      stock INTEGER DEFAULT 0,
+      featured INTEGER DEFAULT 0,
+      popularity INTEGER DEFAULT 0,
+      image_url TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS instagram_posts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      post_id TEXT UNIQUE NOT NULL,
+      caption TEXT,
+      media_type TEXT,
+      media_url TEXT,
+      permalink TEXT,
+      timestamp DATETIME,
+      likes INTEGER DEFAULT 0,
+      comments INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS email_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      recipient TEXT NOT NULL,
+      subject TEXT,
+      status TEXT DEFAULT 'sent',
+      error_message TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_users_role_id ON users(role_id);
     CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
@@ -104,6 +176,13 @@ export async function runSchema() {
     CREATE INDEX IF NOT EXISTS idx_audit_created_at ON audit_logs(created_at);
     CREATE INDEX IF NOT EXISTS idx_content_type ON content(type);
     CREATE INDEX IF NOT EXISTS idx_content_active ON content(is_active);
+    CREATE INDEX IF NOT EXISTS idx_chat_phone ON chat_conversations(phone_number);
+    CREATE INDEX IF NOT EXISTS idx_chat_msg_conversation ON chat_messages(conversation_id);
+    CREATE INDEX IF NOT EXISTS idx_reservations_phone ON reservations(phone_number);
+    CREATE INDEX IF NOT EXISTS idx_reservations_status ON reservations(status);
+    CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
+    CREATE INDEX IF NOT EXISTS idx_products_featured ON products(featured);
+    CREATE INDEX IF NOT EXISTS idx_instagram_timestamp ON instagram_posts(timestamp);
   `);
 
   return db;
