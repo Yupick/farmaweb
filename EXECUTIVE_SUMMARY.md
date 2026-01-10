@@ -41,7 +41,7 @@ Desarrollar una solución integral de software que incluya una landing page din�
 ```
 
 #### 3. Configuración Inicial
-- Usuario admin: `admin@farmamalvinas.com`
+- Usuario admin: `admin@fciacientifica.com.ar`
 - Contraseña: `cientifica123` (hasheada)
 - Variables de entorno documentadas
 - Scripts de inicialización de BD
