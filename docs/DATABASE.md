@@ -418,7 +418,7 @@ users → admin_audit_log (1:N)
 INSERT INTO users (id, email, password_hash, role_id, status)
 VALUES (
     'uuid-admin-1',
-    'admin@farmamalvinas.com',
+    'admin@fciacientifica.com.ar',
     '$2b$10$...',  -- hash de cientifica123
     1,
     'active'

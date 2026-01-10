@@ -17,7 +17,7 @@ npm start
 El servidor iniciará en `http://localhost:5000`
 
 **Credenciales de prueba:**
-- Email: `admin@farmamalvinas.com`
+- Email: `admin@fciacientifica.com.ar`
 - Contraseña: `cientifica123`
 
 ### Frontend

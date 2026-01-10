@@ -119,7 +119,7 @@ Debería mostrar:
 Una vez instalado, puedes acceder con:
 
 ```
-📧 Email: admin@farmamalvinas.com
+📧 Email: admin@fciacientifica.com.ar
 🔐 Contraseña: cientifica123
 ```
 

@@ -8,7 +8,7 @@ import axios from 'axios'
 export default function Login() {
   const router = useRouter()
   const { setUser, setToken } = useAuth()
-  const [email, setEmail] = useState('admin@farmamalvinas.com')
+  const [email, setEmail] = useState('admin@fciacientifica.com.ar')
   const [password, setPassword] = useState('cientifica123')
   const [error, setError] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -92,7 +92,7 @@ export default function Login() {
           </button>
 
           <p className="text-xs text-gray-500 text-center mt-4">
-            Credenciales de demo: admin@farmamalvinas.com / cientifica123
+            Credenciales de demo: admin@fciacientifica.com.ar / cientifica123
           </p>
         </form>
       </div>

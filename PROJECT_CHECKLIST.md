@@ -43,7 +43,7 @@
 - [x] Tabla: products (11 campos - Fase 5)
 
 #### Datos Iniciales
-- [x] Usuario admin: admin@farmamalvinas.com
+- [x] Usuario admin: admin@fciacientifica.com.ar
 - [x] Contraseña encriptada: cientifica123
 - [x] Roles: admin, moderador, usuario
 - [x] Configuraciones por defecto

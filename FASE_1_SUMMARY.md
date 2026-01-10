@@ -99,7 +99,7 @@ npm run dev
 
 ### Credenciales de Prueba
 ```
-Email: admin@farmamalvinas.com
+Email: admin@fciacientifica.com.ar
 Contraseña: cientifica123
 ```
 

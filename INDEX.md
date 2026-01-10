@@ -185,7 +185,7 @@ Ubicación: `/database/schemas/`
 Ubicación: `/database/seeds/`
 
 1. [database/seeds/001_admin_user.sql](database/seeds/001_admin_user.sql)
-   - Usuario admin: admin@farmamalvinas.com
+   - Usuario admin: admin@fciacientifica.com.ar
    - Contraseña: cientifica123 (hasheada)
 
 2. [database/seeds/002_configurations.sql](database/seeds/002_configurations.sql)

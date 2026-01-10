@@ -81,7 +81,7 @@ async function startServer() {
 ║   📍 http://localhost:${PORT}                        
 ║   🔐 Base de datos: SQLite                          ║
 ║   🔑 Auth: JWT                                      ║
-║   👤 Admin: admin@farmamalvinas.com / cientifica123 ║
+║   👤 Admin: admin@fciacientifica.com.ar / cientifica123 ║
 ╚════════════════════════════════════════════════════╝
       `);
     });

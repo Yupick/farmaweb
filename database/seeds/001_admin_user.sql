@@ -8,7 +8,7 @@
 INSERT OR IGNORE INTO users (id, email, password_hash, role_id, status, created_at, updated_at) 
 VALUES (
     'admin-001',
-    'admin@farmamalvinas.com',
+    'admin@fciacientifica.com.ar',
     '$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcg7b3XeKeUxWDeT5u8D7IceIVO', -- hash de cientifica123
     1, -- role_id = admin
     'active',

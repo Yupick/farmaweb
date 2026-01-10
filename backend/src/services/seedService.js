@@ -41,7 +41,7 @@ export async function createAdminUser() {
     return;
   }
 
-  const email = process.env.ADMIN_EMAIL || 'admin@farmamalvinas.com';
+  const email = process.env.ADMIN_EMAIL || 'admin@fciacientifica.com.ar';
   const password = process.env.ADMIN_PASSWORD || 'cientifica123';
   
   // Verificar si el usuario ya existe
