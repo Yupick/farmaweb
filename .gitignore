@@ -1,0 +1,72 @@
+# .gitignore - Archivos a ignorar en Git
+
+# Dependencias
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# Variables de entorno
+.env
+.env.local
+.env.development
+.env.production
+.env.*.local
+
+# Base de datos
+database/farmaweb.db
+database/farmaweb.db-shm
+database/farmaweb.db-wal
+*.db
+*.sqlite
+*.sqlite3
+
+# Compilados
+dist/
+build/
+.next/
+out/
+.turbo/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+
+# Logs
+logs/
+*.log
+
+# Temporales
+tmp/
+temp/
+.cache/
+
+# Backups
+*.bak
+*.backup
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Específicos del proyecto
+admin_passwords.txt
+api_keys.txt
+local_config.json
+
+# Datos sensibles
+*.pem
+*.key
+*.crt
