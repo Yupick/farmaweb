@@ -1,6 +1,6 @@
 import express from 'express';
 import * as whatsappController from '../controllers/whatsappController.js';
-import { authenticate } from '../middleware/auth.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -20,6 +20,6 @@ router.post('/', whatsappController.handleIncomingMessage);
  * POST /api/webhooks/whatsapp/test
  * Envío de mensaje de prueba (requiere autenticación)
  */
-router.post('/test', authenticate, whatsappController.sendTestMessage);
+router.post('/test', authenticateToken, whatsappController.sendTestMessage);
 
 export default router;
