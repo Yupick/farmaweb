@@ -92,21 +92,40 @@ stop_service() {
 kill_by_port() {
     local port=$1
     local service_name=$2
-    
-    print_info "Buscando proceso en puerto $port..."
-    local pid=$(lsof -t -i ":$port" 2>/dev/null || netstat -tulpn 2>/dev/null | grep ":$port " | awk '{print $NF}' | cut -d'/' -f1)
-    
-    if [ -n "$pid" ] && [ "$pid" != "-" ]; then
-        print_info "Encontrado $service_name (PID: $pid), deteniendo..."
-        kill "$pid" 2>/dev/null || true
-        sleep 1
-        
-        if ! ps -p "$pid" > /dev/null 2>&1; then
-            print_status "$service_name detenido"
-            return 0
+
+    print_info "Buscando proceso(s) en puerto $port..."
+    # Obtener todos los PIDs que escuchan en el puerto
+    local pids=$(lsof -t -i ":$port" 2>/dev/null)
+    # Fallback con netstat (puede devolver un único PID)
+    if [ -z "$pids" ]; then
+        pids=$(netstat -tulpn 2>/dev/null | grep ":$port " | awk '{print $NF}' | cut -d'/' -f1)
+    fi
+
+    if [ -n "$pids" ]; then
+        for pid in $pids; do
+            if [ -n "$pid" ] && [ "$pid" != "-" ]; then
+                print_info "Deteniendo $service_name (PID: $pid)..."
+                kill "$pid" 2>/dev/null || true
+                sleep 1
+                if ps -p "$pid" > /dev/null 2>&1; then
+                    print_warning "PID $pid aún activo, forzando..."
+                    kill -9 "$pid" 2>/dev/null || true
+                fi
+            fi
+        done
+        # Verificar nuevamente si queda algo en el puerto; usar fuser como última opción
+        if lsof -t -i ":$port" > /dev/null 2>&1; then
+            if command -v fuser >/dev/null 2>&1; then
+                print_warning "Usando fuser para liberar puerto $port..."
+                fuser -k "$port"/tcp 2>/dev/null || true
+            fi
+        fi
+        # Confirmación final
+        if lsof -t -i ":$port" > /dev/null 2>&1; then
+            print_error "No se pudo liberar completamente el puerto $port"
+            return 1
         else
-            kill -9 "$pid" 2>/dev/null || true
-            print_status "$service_name forzadamente detenido"
+            print_status "$service_name liberado en puerto $port"
             return 0
         fi
     else
@@ -161,14 +180,29 @@ echo ""
 
 if [ $FAILED -eq 0 ]; then
     print_status "Todos los servicios se detuvieron correctamente"
-    print_info "Puedes ejecutar './start-services.sh' para iniciar nuevamente"
 else
     print_warning "Se encontraron $FAILED problema(s) al detener servicios"
 fi
 echo ""
+
+# Intentar liberar puertos si quedaron ocupados
+print_info "Comprobando y liberando puertos si es necesario..."
+if lsof -t -i :3000 > /dev/null 2>&1; then
+    kill_by_port 3000 "Frontend"
+fi
+if lsof -t -i :3001 > /dev/null 2>&1; then
+    kill_by_port 3001 "Backend"
+fi
 
 # Status final de puertos
 echo "🔍 Verificando puertos:"
 echo "   Puerto 3000 (Frontend): " $(lsof -i :3000 &>/dev/null && echo "EN USO" || echo "✓ Disponible")
 echo "   Puerto 3001 (Backend):  " $(lsof -i :3001 &>/dev/null && echo "EN USO" || echo "✓ Disponible")
 echo ""
+
+if ! lsof -i :3000 &>/dev/null && ! lsof -i :3001 &>/dev/null; then
+    print_status "Puertos 3000 y 3001 libres."
+    print_info "Puedes ejecutar './start-services.sh' para iniciar nuevamente"
+else
+    print_warning "Algún puerto sigue ocupado. Considera revisar procesos manualmente."
+fi

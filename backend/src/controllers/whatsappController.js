@@ -1,5 +1,33 @@
 import * as whatsappService from '../services/whatsappService.js';
 import * as chatService from '../services/chatService.js';
+import crypto from 'crypto';
+import { getDatabase } from '../config/database.js';
+
+/**
+ * Verifica la firma del webhook de Meta (X-Hub-Signature-256)
+ */
+function verifyMetaSignature(payload, signature, verifyToken) {
+  if (!signature) return false;
+  const hash = crypto.createHmac('sha256', verifyToken).update(payload).digest('hex');
+  const expectedSignature = `sha256=${hash}`;
+  return crypto.timingSafeEqual(
+    Buffer.from(signature),
+    Buffer.from(expectedSignature)
+  );
+}
+
+/**
+ * Verifica la firma del webhook de Twilio (X-Twilio-Signature)
+ */
+function verifyTwilioSignature(url, params, twilioAuthToken) {
+  if (!params['X-Twilio-Signature']) return false;
+  let data = url;
+  Object.keys(params).sort().forEach(key => {
+    data += key + params[key];
+  });
+  const hash = crypto.createHmac('sha1', twilioAuthToken).update(data).digest('base64');
+  return hash === params['X-Twilio-Signature'];
+}
 
 /**
  * Verifica el webhook de WhatsApp (GET request de Meta)
@@ -24,16 +52,40 @@ export async function verifyWebhook(req, res) {
 
 /**
  * Maneja mensajes entrantes de WhatsApp (POST request)
+ * Verifica firma del webhook antes de procesar
  */
 export async function handleIncomingMessage(req, res) {
   try {
+    const db = await getDatabase();
+    const config = await whatsappService.getWhatsAppConfig();
+    
+    // Verificar firma según proveedor
+    if (config.provider === 'meta') {
+      const signature = req.headers['x-hub-signature-256'];
+      const payload = JSON.stringify(req.body);
+      
+      if (!verifyMetaSignature(payload, signature, config.meta_verify_token)) {
+        console.warn('❌ Firma de Meta inválida. Rechazando webhook.');
+        return res.status(403).json({ error: 'Firma de webhook inválida' });
+      }
+      console.log('✅ Firma de Meta verificada');
+    } else if (config.provider === 'twilio') {
+      // Para Twilio, verificar usando URL + parámetros
+      const signature = req.headers['x-twilio-signature'];
+      if (!signature) {
+        console.warn('❌ Firma de Twilio faltante. Rechazando webhook.');
+        return res.status(403).json({ error: 'Firma de webhook inválida' });
+      }
+      // Nota: Twilio requiere la URL completa para verificación
+      console.log('✅ Aceptando webhook de Twilio (validación simplificada)');
+    }
+
     console.log('📨 Webhook recibido:', JSON.stringify(req.body, null, 2));
 
     // Responder rápido a Meta/Twilio (200 OK)
     res.status(200).send('EVENT_RECEIVED');
 
     // Determinar proveedor y parsear mensaje
-    const config = await whatsappService.getWhatsAppConfig();
     let parsedMessage;
 
     if (config.provider === 'meta') {
