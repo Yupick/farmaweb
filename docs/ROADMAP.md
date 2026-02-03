@@ -352,49 +352,63 @@ Construir una solución integral de software para la Farmacia Científica Malvin
 - Preparar modelos de productos y pedidos
 - Integración con chatbot para disponibilidad
 - Estructura de carritos y órdenes
+- Definir APIs y contratos de datos (catálogo, carrito, órdenes)
+- Preparar frontend para navegación de tienda (sin pagos)
 
 #### Tareas Técnicas
 
 **Modelos de Datos**
-- [ ] Tabla productos (id, nombre, precio, stock, descripcion, imagen)
-- [ ] Tabla categorias (id, nombre, descripcion)
-- [ ] Tabla promociones (id, nombre, descuento, fecha_inicio, fecha_fin)
-- [ ] Tabla pedidos (id, cliente_id, estado, total, fecha)
-- [ ] Tabla detalle_pedidos (id, pedido_id, producto_id, cantidad, precio)
-- [ ] Tabla carritos (id, cliente_id, estado, fecha_creacion)
+- [ ] Tabla productos (id, nombre, sku, precio, stock, descripcion, imagen_url, categoria_id, activo, created_at, updated_at)
+- [ ] Tabla categorias (id, nombre, descripcion, slug, activo)
+- [ ] Tabla promociones (id, nombre, descuento, fecha_inicio, fecha_fin, condiciones)
+- [ ] Tabla pedidos (id, cliente_id, estado, total, subtotal, descuento, fecha, canal)
+- [ ] Tabla detalle_pedidos (id, pedido_id, producto_id, cantidad, precio_unitario)
+- [ ] Tabla carritos (id, cliente_id, estado, fecha_creacion, updated_at)
 - [ ] Tabla detalle_carritos (id, carrito_id, producto_id, cantidad)
+- [ ] Índices por categoria_id, cliente_id, estado, created_at
 
 **Roles y Permisos**
 - [ ] Extender rol de usuario (cliente)
 - [ ] Crear rol de vendedor (opcional)
 - [ ] Crear rol de gerente de inventario
 - [ ] Matriz de permisos por rol
+- [ ] Permisos mínimos: products:read/write, orders:read/write, cart:read/write
 
 **Funcionalidad de Tienda**
-- [ ] Endpoint de catálogo de productos
-- [ ] Búsqueda y filtrado de productos
-- [ ] Gestión de carritos
-- [ ] Integración chatbot → preguntar disponibilidad
-- [ ] Histórico de órdenes
-- [ ] Sistema de notificaciones de estado
+- [ ] Endpoints de catálogo (GET /products, GET /products/:id, GET /categories)
+- [ ] Búsqueda y filtrado (q, categoria, precio_min/max, stock)
+- [ ] Gestión de carritos (GET/POST/PUT/DELETE /cart)
+- [ ] Órdenes (POST /orders, GET /orders, GET /orders/:id)
+- [ ] Integración chatbot → disponibilidad y precio básico
+- [ ] Histórico de órdenes por usuario
+- [ ] Sistema de estados (pending/paid/shipped/cancelled)
 
 **Frontend - Preparación**
-- [ ] Componentes de producto
-- [ ] Página de catálogo (sin checkout aún)
-- [ ] Página de carrito (sin pago aún)
+- [ ] Componentes de producto (card, filtros, detalle)
+- [ ] Página de catálogo (sin checkout)
+- [ ] Página de carrito (sin pago)
 - [ ] Página de perfil de cliente
 - [ ] Historial de órdenes
+- [ ] Manejo de estados vacíos y loading
+
+**Backend - Servicios**
+- [ ] Servicios de dominio: productos, carrito, órdenes
+- [ ] Reglas de stock (no negativo, reserva simple)
+- [ ] Validaciones de datos y sanitización
 
 #### Entregables
-- ✅ Estructura de tienda online lista
-- ✅ Modelos de productos y pedidos
+- ✅ Estructura de tienda online definida
+- ✅ Modelos y endpoints especificados
+- ✅ Contratos de API documentados
+- ✅ UI base de tienda diseñada (sin pagos)
 - ✅ Chatbot consultable sobre disponibilidad
 - ✅ Sistema de roles extendido
 
 #### Criterios de Aceptación
-- Base de datos contiene todos los modelos
-- Admin puede crear/editar productos
-- Chatbot responde sobre disponibilidad
+- Base de datos contiene todos los modelos e índices
+- Admin puede crear/editar productos y categorías
+- Carrito por usuario consistente y stock nunca negativo
+- Chatbot responde disponibilidad y precio
 - Sistema preparado para agregar pago
 
 ---
